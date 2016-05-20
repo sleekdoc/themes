@@ -15,7 +15,7 @@
 
             <div class="form-group">
                 <label for="">Base URI</label>
-                <input id="base-uri" type="text" class="form-control input-block" value="{{ $data['default_base_uri'] }}"/>
+                <input id="base-uri" type="text" class="form-control input-block" value=""/>
             </div>
 
             <hr/>
@@ -28,7 +28,7 @@
 
                 @foreach ($data['api'] as $category => $contents)
                     <li class="{{ $category_active ? 'active' : '' }}">
-                        <a href="#{{ $category }}-{{ $unique_tab }}" data-toggle="tab">{{ $category }}</a>
+                        <a class="tab-click" data-base-uri="{{ $data['default_base_uri'][strtolower($category)] }}" href="#{{ $category }}-{{ $unique_tab }}" data-toggle="tab">{{ $category }}</a>
                     </li>
 
                     <?php $category_active = false ?>
@@ -66,6 +66,10 @@
                     </div>
                 @endforeach
             </div>
+            <div class="footer">
+                <hr>
+                <a href="http://github.com/sleekdoc/sleekdoc">SleekDoc &copy; 2016</a>
+            </div>
         </div>
 
 
@@ -91,45 +95,70 @@
 
             $(function() {
 
+                $(".tab-click").on("click", function() {
+                    $("#base-uri").val($(this).data('base-uri'));
+                });
+                $(".tab-click").first().click();
+
                 $(".namespace-info").tooltip();
 
-                // $(".collapse").collapse();
-
-                $('.rest-form').on('submit', function(e) {
-
+                $(".rest-form").on("submit", function(e) {
                     e.preventDefault();
 
                     var form = $(this);
-                    var method = form.attr('method');
+                    var method = form.attr("method");
                     var headers = {};
 
-                    $.each(JSON.parse(form.find('.headers').val()), function(key, val) {
+                    $.each(JSON.parse(form.find(".headers").val()), function(key, val) {
                         headers[val.label] = val.value;
                     });
 
+                    var unique = form.data("unique");
+
                     $.ajax({
-                        url: $("#base-uri").val() + form.find('.route').val(),
+                        url: $("#base-uri").val() + form.find(".route").val(),
                         type: method,
                         data: $(this).serializeObject(),
                         headers: headers,
-                        dataType: 'json',
+                        dataType: "json",
                         success: function (data) {
-                            var unique = form.data('unique');
-
                             $("#response-"+unique).html(JSON.stringify(data, null, 4));
                         },
                         error: function (err) {
-                            $("#response-"+unique).html(JSON.stringify(data, null, 4));
+                            $("#response-"+unique).html(JSON.stringify(err, null, 4));
                         }
                     });
                 });
 
-                $('.response-reset').on('click', function(e) {
+                $(".xml-form").on("submit", function(e) {
                     e.preventDefault();
 
-                    // console.log('triggered');
+                    var form = $(this);
+                    var method = form.attr("method");
 
-                    $(this).closest('div').find('pre').html('');
+                    var unique = form.data("unique");
+
+                    $.ajax({
+                        url: $("#base-uri").val(),
+                        type: method,
+                        data: form.find('.raw-xml').val(),
+                        contentType: "text/xml",
+                        dataType: "text",
+                        success: function (data) {
+                            $("#response-"+unique).text(data);
+                        },
+                        error: function (err, ajaxOptions, thrownError) {
+                            $("#response-"+unique).html(JSON.stringify(err, null, 4));
+                            console.log(thrownError);
+                        }
+                    });
+                });
+
+                $(".response-reset").on("click", function(e) {
+                    console.log('triggered');
+                    e.preventDefault();
+
+                    $(this).closest("div").find("pre").html('');
                 });
             });
         </script>

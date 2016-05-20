@@ -121,14 +121,11 @@
                         </form>
                       </div>
                   </div>
-               </div>
-               <div class="tab-pane" id="sample-{{ $unique }}">
-                  <div class="row">
-                      <div class="col-md-12">
-                          <pre id="sample_response-{{ $unique }}">{{ json_encode($content['response'], JSON_PRETTY_PRINT ) }}</pre>
-                      </div>
+                  <div>
+                    <h4>Response <a href="#" class="btn btn-xs btn-danger response-reset">reset</a></h4>
+                    <pre id="response-{{ $unique }}"></pre>
                   </div>
-               </div>
+                </div>
             </div>
         </div>
     </div>
